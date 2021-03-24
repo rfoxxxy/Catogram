@@ -176,6 +176,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import ua.itaysonlab.catogram.CatogramPreferencesNavigator;
+
 public class ProfileActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, SharedMediaLayout.SharedMediaPreloaderDelegate, ImageUpdater.ImageUpdaterDelegate {
 
     private RecyclerListView listView;
@@ -350,6 +352,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
     private int bioRow;
     private int settingsSectionRow;
     private int settingsSectionRow2;
+    private int catogramRow;
     private int notificationRow;
     private int languageRow;
     private int privacyRow;
@@ -2566,6 +2569,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 presentFragment(fragment);
             } else if (position == notificationRow) {
                 presentFragment(new NotificationsSettingsActivity());
+            } else if (position == catogramRow) {
+                presentFragment(CatogramPreferencesNavigator.createMainMenu());
             } else if (position == privacyRow) {
                 presentFragment(new PrivacySettingsActivity());
             } else if (position == dataRow) {
@@ -5152,6 +5157,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
         bioRow = -1;
         settingsSectionRow = -1;
         settingsSectionRow2 = -1;
+        catogramRow = -1;
         notificationRow = -1;
         languageRow = -1;
         privacyRow = -1;
@@ -5232,6 +5238,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                 bioRow = rowCount++;
                 settingsSectionRow = rowCount++;
                 settingsSectionRow2 = rowCount++;
+                catogramRow = rowCount++;
                 notificationRow = rowCount++;
                 privacyRow = rowCount++;
                 dataRow = rowCount++;
@@ -6572,7 +6579,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                                 abi = "universal " + Build.CPU_ABI + " " + Build.CPU_ABI2;
                                 break;
                         }
-                        cell.setText(LocaleController.formatString("TelegramVersion", R.string.TelegramVersion, String.format(Locale.US, "v%s (%d) %s", pInfo.versionName, code, abi)));
+                        cell.setText(LocaleController.formatString("CatogramVersion", R.string.CatogramVersion, String.format(Locale.US, "v%s (%d) %s", pInfo.versionName, code, abi)));
                     } catch (Exception e) {
                         FileLog.e(e);
                     }
@@ -6765,6 +6772,8 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         textCell.setColors(null, Theme.key_windowBackgroundWhiteRedText5);
                     } else if (position == languageRow) {
                         textCell.setTextAndIcon(LocaleController.getString("Language", R.string.Language), R.drawable.menu_language, false);
+                    } else if (position == catogramRow) {
+                        textCell.setTextAndIcon(LocaleController.getString("AdvancedSettings", R.string.AdvancedSettings), R.drawable.menu_settings, true);
                     } else if (position == notificationRow) {
                         textCell.setTextAndIcon(LocaleController.getString("NotificationsAndSounds", R.string.NotificationsAndSounds), R.drawable.menu_notifications, true);
                     } else if (position == privacyRow) {
@@ -6918,7 +6927,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         position == languageRow || position == setUsernameRow || position == bioRow ||
                         position == versionRow || position == dataRow || position == chatRow ||
                         position == questionRow || position == devicesRow || position == filtersRow ||
-                        position == faqRow || position == policyRow || position == sendLogsRow ||
+                        position == faqRow || position == policyRow || position == sendLogsRow || position == catogramRow ||
                         position == clearLogsRow || position == switchBackendRow || position == setAvatarRow;
             }
             if (holder.itemView instanceof UserCell) {
@@ -6953,7 +6962,7 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
             } else if (position == settingsTimerRow || position == settingsKeyRow || position == reportRow ||
                     position == subscribersRow || position == administratorsRow || position == blockedUsersRow ||
                     position == addMemberRow || position == joinRow || position == unblockRow ||
-                    position == sendMessageRow || position == notificationRow || position == privacyRow ||
+                    position == sendMessageRow || position == notificationRow || position == catogramRow || position == privacyRow ||
                     position == languageRow || position == dataRow || position == chatRow ||
                     position == questionRow || position == devicesRow || position == filtersRow ||
                     position == faqRow || position == policyRow || position == sendLogsRow ||
