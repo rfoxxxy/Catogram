@@ -116,6 +116,8 @@ import java.util.Locale;
 import androidx.annotation.UiThread;
 import androidx.core.graphics.ColorUtils;
 
+import ua.itaysonlab.catogram.CatogramConfig;
+
 public class Theme {
 
     public static final String DEFAULT_BACKGROUND_SLUG = "d";

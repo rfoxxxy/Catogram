@@ -238,6 +238,10 @@ import ua.itaysonlab.catogram.message_ctx_menu.TgxExtras;
 import ua.itaysonlab.catogram.stickers.StickerDownloader;
 import ua.itaysonlab.catogram.translate.TranslateAPI;
 import ua.itaysonlab.catogram.CGFeatureHooks;
+import ua.itaysonlab.catogram.ui.CatogramToasts;
+import kotlin.Unit;
+import kotlin.Pair;
+import androidx.appcompat.app.AppCompatActivity;
 
 @SuppressWarnings("unchecked")
 public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
