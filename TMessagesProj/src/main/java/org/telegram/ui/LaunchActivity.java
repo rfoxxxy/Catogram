@@ -148,6 +148,16 @@ import java.util.regex.Pattern;
 
 public class LaunchActivity extends Activity implements ActionBarLayout.ActionBarLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
 
+    private CGUIResources res = null;
+    @Override
+    public Resources getResources() {
+        if (res == null) res = new CGUIResources(super.getResources());
+        return res;
+    }
+    public void reloadResources() {
+        res.reloadReplacements();
+    }
+    
     private static final String EXTRA_ACTION_TOKEN = "actions.fulfillment.extra.ACTION_TOKEN";
 
     private boolean finished;
