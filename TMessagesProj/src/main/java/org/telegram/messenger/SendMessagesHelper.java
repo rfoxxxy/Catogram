@@ -42,6 +42,8 @@ import android.widget.Toast;
 import androidx.annotation.UiThread;
 import androidx.core.view.inputmethod.InputContentInfoCompat;
 
+import com.google.android.exoplayer2.util.Log;
+
 import org.telegram.messenger.audioinfo.AudioInfo;
 import org.telegram.messenger.support.SparseLongArray;
 import org.telegram.tgnet.ConnectionsManager;
@@ -61,7 +63,7 @@ import org.telegram.ui.Components.Bulletin;
 import org.telegram.ui.Components.BulletinFactory;
 import org.telegram.ui.Components.LayoutHelper;
 import org.telegram.ui.Components.Point;
-import org.telegram.ui.PaymentFormActivity;
+import org.telegram.ui.TooManyCommunitiesActivity;
 import org.telegram.ui.TwoStepVerificationActivity;
 import org.telegram.ui.TwoStepVerificationSetupActivity;
 
@@ -2541,9 +2543,9 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
                     if (response instanceof TLRPC.TL_payments_paymentForm) {
                         final TLRPC.TL_payments_paymentForm form = (TLRPC.TL_payments_paymentForm) response;
                         getMessagesController().putUsers(form.users, false);
-                        parentFragment.presentFragment(new PaymentFormActivity(form, messageObject));
+                        //parentFragment.presentFragment(new PaymentFormActivity(form, messageObject));
                     } else if (response instanceof TLRPC.TL_payments_paymentReceipt) {
-                        parentFragment.presentFragment(new PaymentFormActivity(messageObject, (TLRPC.TL_payments_paymentReceipt) response));
+                        //parentFragment.presentFragment(new PaymentFormActivity(messageObject, (TLRPC.TL_payments_paymentReceipt) response));
                     }
                 } else {
                     TLRPC.TL_messages_botCallbackAnswer res = (TLRPC.TL_messages_botCallbackAnswer) response;
