@@ -16481,7 +16481,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         return false;
     }
 
-    private void updatePinnedMessageView(boolean animated) {
+    public void updatePinnedMessageView(boolean animated) {
         updatePinnedMessageView(animated, 0);
     }
 
@@ -16567,7 +16567,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         }
     }
 
-    private void updatePinnedMessageView(boolean animated, int animateToNext) {
+    public void updatePinnedMessageView(boolean animated, int animateToNext) {
         if (pinnedMessageView == null || chatMode != 0) {
             return;
         }
