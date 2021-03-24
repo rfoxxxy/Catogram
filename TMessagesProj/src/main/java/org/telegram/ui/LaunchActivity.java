@@ -146,6 +146,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import ua.itaysonlab.catogram.vkui.CGUIResources;
+
 public class LaunchActivity extends Activity implements ActionBarLayout.ActionBarLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
 
     private CGUIResources res = null;
