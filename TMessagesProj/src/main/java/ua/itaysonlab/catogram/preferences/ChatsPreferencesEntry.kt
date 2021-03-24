@@ -140,30 +140,6 @@ class ChatsPreferencesEntry : BasePreferencesEntry {
         category(LocaleController.getString("AS_Header_Notification", R.string.AS_Header_Notification)) {
 
             switch {
-                title = LocaleController.getString("CG_DND", R.string.CG_DND)
-                summary = LocaleController.getString("CG_DND_desc", R.string.CG_DND_desc)
-
-
-                contract({
-                    return@contract CatogramConfig.silenceDND
-                }) {
-                    CatogramConfig.silenceDND = it
-                }
-            }
-
-            switch {
-                title = LocaleController.getString("CG_Silence", R.string.CG_Silence)
-                summary = LocaleController.getString("CG_Silence_desc", R.string.CG_Silence_desc)
-
-
-                contract({
-                    return@contract CatogramConfig.totalSilence
-                }) {
-                    CatogramConfig.totalSilence = it
-                }
-            }
-
-            switch {
                 title = LocaleController.getString("CG_SilenceNonContacts", R.string.CG_SilenceNonContacts)
                 summary = LocaleController.getString("CG_SilenceNonContacts_desc", R.string.CG_SilenceNonContacts_desc)
 
@@ -270,26 +246,6 @@ class ChatsPreferencesEntry : BasePreferencesEntry {
                 }
             }
 
-            /* switch {
-                title = LocaleController.getString("CG_FlatChannels", R.string.CG_FlatChannels)
-
-                contract({
-                    return@contract CatogramConfig.flatChannelStyle
-                }) {
-                    CatogramConfig.flatChannelStyle = it
-                }
-            } */
-
-            switch {
-                title = LocaleController.getString("CG_FABLeft", R.string.CG_FABLeft)
-
-                contract({
-                    return@contract CatogramConfig.forceLeftFab
-                }) {
-                    CatogramConfig.forceLeftFab = it
-                }
-            }
-
             switch {
                 title = LocaleController.getString("CG_HideKbdOnScroll", R.string.CG_HideKbdOnScroll)
 
@@ -309,17 +265,6 @@ class ChatsPreferencesEntry : BasePreferencesEntry {
                     CatogramConfig.msgForwardDate = it
                 }
             }
-
-            /*switch {
-                title = LocaleController.getString("CG_GhostMode", R.string.CG_GhostMode)
-                summary = LocaleController.getString("CG_GhostMode_Desc", R.string.CG_GhostMode_Desc)
-
-                contract({
-                    return@contract CatogramConfig.ghostMode
-                }) {
-                    CatogramConfig.ghostMode = it
-                }
-            }*/
 
             list {
                 title = LocaleController.getString("CG_MsgSlideAction", R.string.CG_MsgSlideAction)

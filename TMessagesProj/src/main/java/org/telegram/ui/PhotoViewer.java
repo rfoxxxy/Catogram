@@ -240,6 +240,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ua.itaysonlab.catogram.CatogramConfig;
+
 @SuppressWarnings("unchecked")
 public class PhotoViewer implements NotificationCenter.NotificationCenterDelegate, GestureDetector2.OnGestureListener, GestureDetector2.OnDoubleTapListener {
 
@@ -3863,6 +3865,8 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                                         } else {
                                             cell.setText(LocaleController.formatString("DeleteForUser", R.string.DeleteForUser, UserObject.getFirstName(currentUser)), "", false, false);
                                         }
+                                        deleteForAll[0] = true;
+                                        cell.setChecked(deleteForAll[0], true); // Mark "delete for user" as default.
                                         cell.setPadding(LocaleController.isRTL ? AndroidUtilities.dp(16) : AndroidUtilities.dp(8), 0, LocaleController.isRTL ? AndroidUtilities.dp(8) : AndroidUtilities.dp(16), 0);
                                         frameLayout.addView(cell, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 48, Gravity.TOP | Gravity.LEFT, 0, 0, 0, 0));
                                         cell.setOnClickListener(v -> {
@@ -5863,12 +5867,12 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         return 0;
     }
 
-	private int getRightInset() {
-		if (lastInsets != null && Build.VERSION.SDK_INT >= 21) {
-			return ((WindowInsets) lastInsets).getSystemWindowInsetRight();
-		}
-		return 0;
-	}
+    private int getRightInset() {
+        if (lastInsets != null && Build.VERSION.SDK_INT >= 21) {
+            return ((WindowInsets) lastInsets).getSystemWindowInsetRight();
+        }
+        return 0;
+    }
 
     private void dismissInternal() {
         try {
@@ -6088,7 +6092,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             x = max;
         }
         videoPreviewFrame.setTranslationX(x);
-     }
+    }
 
     private void showVideoSeekPreviewPosition(boolean show) {
         if (show && videoPreviewFrame.getTag() != null || !show && videoPreviewFrame.getTag() == null) {
@@ -8734,10 +8738,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         if (Build.VERSION.SDK_INT >= 21 && sendPhotoType != SELECT_TYPE_AVATAR && containerView != null) {
             int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             if (!actionBarVisible) {
-                flags |= View.SYSTEM_UI_FLAG_FULLSCREEN;
-                if (containerView.getPaddingLeft() > 0 || containerView.getPaddingRight() > 0) {
-                    flags |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-                }
+                flags |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
             }
             containerView.setSystemUiVisibility(flags);
         }
@@ -9887,6 +9888,32 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             }
             nameTextView.setText("");
             dateTextView.setText("");
+
+            // Show date time for avatars.
+            boolean isIndexInvalid = (switchingToIndex < 0 || switchingToIndex >= avatarsArr.size());
+            if (!avatarsArr.isEmpty() && !isIndexInvalid) {
+                long date = (long) avatarsArr.get(switchingToIndex).date * 1000;
+                if (date > 10000) {
+                    String dateString = LocaleController.formatString(
+                        "formatDateAtTime",
+                        R.string.formatDateAtTime,
+                        LocaleController.getInstance().formatterYear.format(new Date(date)),
+                        LocaleController.getInstance().formatterDay.format(new Date(date)));
+                    dateTextView.setText(dateString);
+                }
+            }
+            if (avatarsDialogId < 0) {
+                TLRPC.Chat chat = MessagesController.getInstance(currentAccount).getChat(-avatarsDialogId);
+                if (chat != null) {
+                    nameTextView.setText(chat.title);
+                }
+            } else {
+                TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(avatarsDialogId);
+                if (user != null) {
+                    nameTextView.setText(UserObject.getUserName(user));
+                }
+            }
+
             if (canEditAvatar && !avatarsArr.isEmpty()) {
                 menuItem.showSubItem(gallery_menu_edit_avatar);
                 boolean currentSet = isCurrentAvatarSet();
@@ -11208,7 +11235,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
         if (Instance != null) {
             result = Instance.isVisible && !Instance.disableShowCheck && object != null &&
                     ((Instance.currentFileLocation != null && object.local_id == Instance.currentFileLocation.location.local_id && object.volume_id == Instance.currentFileLocation.location.volume_id && object.dc_id == Instance.currentFileLocation.dc_id) ||
-                     (Instance.currentFileLocationVideo != null && object.local_id == Instance.currentFileLocationVideo.location.local_id && object.volume_id == Instance.currentFileLocationVideo.location.volume_id && object.dc_id == Instance.currentFileLocationVideo.dc_id));
+                            (Instance.currentFileLocationVideo != null && object.local_id == Instance.currentFileLocationVideo.location.local_id && object.volume_id == Instance.currentFileLocationVideo.location.volume_id && object.dc_id == Instance.currentFileLocationVideo.dc_id));
         }
         return result;
     }
@@ -13790,7 +13817,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             return false;
         }
         float x = e.getX();
-        if (checkImageView.getVisibility() != View.VISIBLE) {
+        if (!ua.itaysonlab.catogram.CatogramConfig.INSTANCE.getProfiles_noEdgeTapping() && checkImageView.getVisibility() != View.VISIBLE) {
             int side = Math.min(135, containerView.getMeasuredWidth() / 8);
             if (x < side) {
                 if (leftImage.hasImageSet()) {
@@ -13941,7 +13968,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
     }
 
     private boolean enableSwipeToPiP() {
-        if (!BuildVars.DEBUG_PRIVATE_VERSION) {
+        if (!CatogramConfig.INSTANCE.getEnableSwipeToPIP()) {
             return false;
         }
         boolean permissionsEnabled = Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(parentActivity);

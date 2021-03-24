@@ -238,49 +238,6 @@ class AppearancePreferencesEntry : BasePreferencesEntry {
         }
 
         category(LocaleController.getString("AS_DrawerCategory", R.string.AS_DrawerCategory)) {
-            list {
-                title = LocaleController.getString("AS_ForceIcons", R.string.AS_ForceIcons)
-
-                contract({
-                    return@contract listOf(
-                            Pair(0, LocaleController.getString("AS_ForceDefault_Drawer", R.string.AS_ForceDefault_Drawer)),
-                            Pair(1, LocaleController.getString("AS_ForceSV_Drawer", R.string.AS_ForceSV_Drawer)),
-                            Pair(2, LocaleController.getString("AS_ForceNY_Drawer", R.string.AS_ForceNY_Drawer)),
-                            Pair(3, "Halloween")
-                    )
-                }, {
-                    return@contract when (CatogramConfig.redesign_forceDrawerIconsOption) {
-                        1 -> LocaleController.getString("AS_ForceSV_Drawer", R.string.AS_ForceSV_Drawer)
-                        2 -> LocaleController.getString("AS_ForceNY_Drawer", R.string.AS_ForceNY_Drawer)
-                        3 -> "Halloween"
-                        else -> LocaleController.getString("AS_ForceDefault_Drawer", R.string.AS_ForceDefault_Drawer)
-                    }
-                }) {
-                    CatogramConfig.redesign_forceDrawerIconsOption = it
-                    when (CatogramConfig.redesign_forceDrawerIconsOption) {
-                        0 -> {
-                            CatogramConfig.forceNewYearDrawer = false
-                            CatogramConfig.forceSVDrawer = false
-                            CatogramConfig.forceHLDrawer = false
-                        }
-                        1 -> {
-                            CatogramConfig.forceNewYearDrawer = false
-                            CatogramConfig.forceSVDrawer = true
-                            CatogramConfig.forceHLDrawer = false
-                        }
-                        2 -> {
-                            CatogramConfig.forceNewYearDrawer = true
-                            CatogramConfig.forceSVDrawer = false
-                            CatogramConfig.forceHLDrawer = false
-                        }
-                        3 -> {
-                            CatogramConfig.forceNewYearDrawer = false
-                            CatogramConfig.forceSVDrawer = false
-                            CatogramConfig.forceHLDrawer = true
-                        }
-                    }
-                }
-            }
 
             switch {
                 title = LocaleController.getString("AS_DrawerAvatar", R.string.AS_DrawerAvatar)
@@ -309,30 +266,6 @@ class AppearancePreferencesEntry : BasePreferencesEntry {
                     return@contract CatogramConfig.drawerDarken
                 }) {
                     CatogramConfig.drawerDarken = it
-                }
-            }
-        }
-
-        category(LocaleController.getString("AS_Header_Fun", R.string.AS_Header_Fun)) {
-            switch {
-                title = LocaleController.getString("AS_ForceNY", R.string.AS_ForceNY)
-                summary = LocaleController.getString("AS_ForceNYSummary", R.string.AS_ForceNYSummary)
-
-                contract({
-                    return@contract CatogramConfig.forceNewYear
-                }) {
-                    CatogramConfig.forceNewYear = it
-                }
-            }
-
-            switch {
-                title = LocaleController.getString("AS_ForcePacman", R.string.AS_ForcePacman)
-                summary = LocaleController.getString("AS_ForcePacmanSummary", R.string.AS_ForcePacmanSummary)
-
-                contract({
-                    return@contract CatogramConfig.forcePacman
-                }) {
-                    CatogramConfig.forcePacman = it
                 }
             }
         }

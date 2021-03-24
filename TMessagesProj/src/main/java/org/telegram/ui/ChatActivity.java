@@ -233,6 +233,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ua.itaysonlab.catogram.CatogramConfig;
+import ua.itaysonlab.catogram.message_ctx_menu.TgxExtras;
+import ua.itaysonlab.catogram.stickers.StickerDownloader;
+import ua.itaysonlab.catogram.translate.TranslateAPI;
+import ua.itaysonlab.catogram.CGFeatureHooks;
+
 @SuppressWarnings("unchecked")
 public class ChatActivity extends BaseFragment implements NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate, LocationActivity.LocationActivityDelegate, ChatAttachAlertDocumentLayout.DocumentSelectActivityDelegate {
 
@@ -1786,6 +1792,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     }
                     createDeleteMessagesAlert(null, null);
                 } else if (id == forward) {
+                    CGFeatureHooks.switchNoAuthor(false);
                     openForward();
                 } else if (id == save_to) {
                     ArrayList<MessageObject> messageObjects = new ArrayList<>();
@@ -4805,6 +4812,13 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             }
             pinnedMessageView.addView(pinnedListButton, LayoutHelper.createFrame(36, 48, Gravity.RIGHT | Gravity.TOP, 0, 0, 7, 0));
             pinnedListButton.setOnClickListener(v -> openPinnedMessagesList(false));
+            pinnedListButton.setOnLongClickListener(v -> {
+                SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
+                preferences.edit().putInt("pin_" + dialog_id, pinnedMessageIds.get(0)).commit();
+                updatePinnedMessageView(true);
+                CatogramToasts.notifyAboutUnpin();
+                return true;
+            });
 
             closePinned = new ImageView(context);
             closePinned.setImageResource(R.drawable.miniplayer_close);
@@ -4859,6 +4873,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                     SharedPreferences preferences = MessagesController.getNotificationsSettings(currentAccount);
                     preferences.edit().putInt("pin_" + dialog_id, pinnedMessageIds.get(0)).commit();
                     updatePinnedMessageView(true);
+                    CatogramToasts.notifyAboutUnpin();
                 }
             });
         }
@@ -6862,34 +6877,21 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
         bottomOverlayImage.setContentDescription(LocaleController.getString("SettingsHelp", R.string.SettingsHelp));
         bottomOverlayImage.setOnClickListener(v -> undoView.showWithAction(dialog_id, UndoView.ACTION_TEXT_INFO, LocaleController.getString("BroadcastGroupInfo", R.string.BroadcastGroupInfo)));
 
-        replyButton = new TextView(context);
-        replyButton.setText(LocaleController.getString("Reply", R.string.Reply));
+         replyButton = new TextView(context);
+        replyButton.setText(LocaleController.getString("CG_Without_Authorship", R.string.CG_Without_Authorship));
         replyButton.setGravity(Gravity.CENTER_VERTICAL);
         replyButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         replyButton.setPadding(AndroidUtilities.dp(14), 0, AndroidUtilities.dp(21), 0);
         replyButton.setBackgroundDrawable(Theme.createSelectorDrawable(Theme.getColor(Theme.key_actionBarActionModeDefaultSelector), 3));
         replyButton.setTextColor(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon));
         replyButton.setCompoundDrawablePadding(AndroidUtilities.dp(7));
-        replyButton.setTypeface(AndroidUtilities.getTypeface("fonts/rmedium.ttf"));
+        replyButton.setTypeface(ua.itaysonlab.extras.CatogramExtras.getBold());
         Drawable image = context.getResources().getDrawable(R.drawable.input_reply).mutate();
         image.setColorFilter(new PorterDuffColorFilter(Theme.getColor(Theme.key_actionBarActionModeDefaultIcon), PorterDuff.Mode.MULTIPLY));
         replyButton.setCompoundDrawablesWithIntrinsicBounds(image, null, null, null);
         replyButton.setOnClickListener(v -> {
-            MessageObject messageObject = null;
-            for (int a = 1; a >= 0; a--) {
-                if (messageObject == null && selectedMessagesIds[a].size() != 0) {
-                    messageObject = messagesDict[a].get(selectedMessagesIds[a].keyAt(0));
-                }
-                selectedMessagesIds[a].clear();
-                selectedMessagesCanCopyIds[a].clear();
-                selectedMessagesCanStarIds[a].clear();
-            }
-            hideActionMode();
-            if (messageObject != null && (messageObject.messageOwner.id > 0 || messageObject.messageOwner.id < 0 && currentEncryptedChat != null)) {
-                showFieldPanelForReply(messageObject);
-            }
-            updatePinnedMessageView(true);
-            updateVisibleRows();
+            CGFeatureHooks.switchNoAuthor(true);
+            openForward(); 
         });
         bottomMessagesActionContainer.addView(replyButton, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, LayoutHelper.MATCH_PARENT, Gravity.LEFT | Gravity.TOP));
 
@@ -9787,7 +9789,7 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
             if (forwardingMessages != null) {
                 ArrayList<MessageObject> messagesToForward = forwardingMessages;
                 forwardingMessages = null;
-                forwardMessages(messagesToForward, false, notify, scheduleDate != 0 && scheduleDate != 0x7ffffffe ? scheduleDate + 1 : scheduleDate);
+                forwardMessages(messagesToForward, CatogramConfig.INSTANCE.getLegacyNoAuthorship(), notify, scheduleDate != 0 && scheduleDate != 0x7ffffffe ? scheduleDate + 1 : scheduleDate);
             }
             chatActivityEnterView.setForceShowSendButton(false, false);
             if (!waitingForSendingMessageLoad) {
@@ -18570,6 +18572,35 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 return;
             }
 
+            String text = selectedObject.messageText.toString();
+            if (text != null && !TextUtils.isEmpty(text)) {
+                items.add(LocaleController.getString("CG_Translate", R.string.CG_Translate));
+                options.add(990);
+                icons.add(R.drawable.round_translate_24);
+            }
+
+            items.add(LocaleController.getString("CG_ToSaved", R.string.CG_ToSaved));
+            options.add(991);
+            icons.add(R.drawable.menu_saved_cg);
+
+            if (CatogramConfig.INSTANCE.getUseTgxMenuSlide()) {
+                AndroidUtilities.hideKeyboard(getParentActivity().findViewById(android.R.id.content));
+                TgxExtras.createSlideMenu(options, items, icons, getParentActivity(), (id) -> {
+                    this.processSelectedOption(id);
+                    return Unit.INSTANCE;
+                }).show(getParentActivity());
+                return;
+            }
+
+            if (CatogramConfig.INSTANCE.getUseTgxMenuSlideSheet()) {
+                AndroidUtilities.hideKeyboard(getParentActivity().findViewById(android.R.id.content));
+                TgxExtras.createSheetMenu(options, items, icons, getParentActivity(), (id) -> {
+                    this.processSelectedOption(id);
+                    return Unit.INSTANCE;
+                }).show(((AppCompatActivity) getParentActivity()).getSupportFragmentManager(), null);
+                return;
+            }
+
             if (scrimPopupWindow != null) {
                 scrimPopupWindow.dismiss();
                 scrimPopupWindow = null;
@@ -19056,16 +19087,126 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                 break;
             }
             case 2: {
-                forwardingMessage = selectedObject;
-                forwardingMessageGroup = selectedObjectGroup;
-                Bundle args = new Bundle();
-                args.putBoolean("onlySelect", true);
-                args.putInt("dialogsType", 3);
-                args.putInt("messagesCount", forwardingMessageGroup == null ? 1 : forwardingMessageGroup.messages.size());
-                args.putInt("hasPoll", forwardingMessage.isPoll() ? (forwardingMessage.isPublicPoll() ? 2 : 1) : 0);
-                DialogsActivity fragment = new DialogsActivity(args);
-                fragment.setDelegate(this);
-                presentFragment(fragment);
+                 if (CatogramConfig.INSTANCE.getNewRepostUI()) {
+                    forwardingMessage = selectedObject;
+                    forwardingMessageGroup = selectedObjectGroup;
+                    ArrayList<MessageObject> fmessages = new ArrayList<>();
+                    if (forwardingMessageGroup == null) {
+                        fmessages.add(forwardingMessage);
+                    } else fmessages.addAll(forwardingMessageGroup.messages);
+                    showDialog(new ShareAlert(getParentActivity(), fmessages, null, ChatObject.isChannel(currentChat), null, false) {
+                        @Override
+                        public void dismissInternal() {
+                            super.dismissInternal();
+                            AndroidUtilities.requestAdjustResize(getParentActivity(), classGuid);
+                            if (chatActivityEnterView.getVisibility() == View.VISIBLE) {
+                                fragmentView.requestLayout();
+                            }
+                            hideActionMode();
+                            updatePinnedMessageView(true);
+                        }
+                    });
+                    AndroidUtilities.setAdjustResizeToNothing(getParentActivity(), classGuid);
+                    fragmentView.requestLayout();
+                } else {
+                    CGFeatureHooks.switchNoAuthor(false);
+                    forwardingMessage = selectedObject;
+                    forwardingMessageGroup = selectedObjectGroup;
+                    Bundle args = new Bundle();
+                    args.putBoolean("onlySelect", true);
+                    args.putInt("dialogsType", 3);
+                    args.putInt("messagesCount", forwardingMessageGroup == null ? 1 : forwardingMessageGroup.messages.size());
+                    args.putInt("hasPoll", forwardingMessage.isPoll() ? (forwardingMessage.isPublicPoll() ? 2 : 1) : 0);
+                    DialogsActivity fragment = new DialogsActivity(args);
+                    fragment.setDelegate(this);
+                    presentFragment(fragment);
+        }
+        break;
+            }
+                        // 990 - translate, 991 - saved
+            case 990: {
+                TranslateAPI.callTranslationDialog(selectedObject, (AppCompatActivity) getParentActivity());
+                break;
+            }
+            case 992: {
+                //CatogramConfig.INSTANCE.getKangBridge().prepareKang(selectedObject.getDocument());
+                break;
+            }
+            case 991: {
+                ArrayList<MessageObject> obj = new ArrayList<>();
+                obj.add(selectedObject);
+                SendMessagesHelper.getInstance(0).sendMessage(obj, UserConfig.getInstance(currentAccount).clientUserId, true, 0);
+                break;
+            }
+            case 993: {
+                if (Build.VERSION.SDK_INT >= 23 && getParentActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    getParentActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);
+                    return;
+                }
+                try {
+                    Pair<String, String> stickerPng = new StickerDownloader(selectedObject).download();
+                    MediaController.saveFile(stickerPng.getSecond(), getParentActivity(), 2, stickerPng.getFirst(), "image/png");
+                    File tmpStickerPng = new File(stickerPng.getFirst());
+                    tmpStickerPng.delete();
+                    undoView.setInfoText(LocaleController.formatString("CG_StickerSavedHint", R.string.CG_StickerSavedHint));
+                    undoView.showWithAction(0, UndoView.ACTION_CACHE_WAS_CLEARED, null, null);
+                } catch (Exception exc) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity());
+                    builder.setTitle(LocaleController.getString("CG_AppName", R.string.CG_AppName));
+                    builder.setMessage(LocaleController.getString("CG_FailedToSaveSticker", R.string.CG_FailedToSaveSticker));
+                    builder.setPositiveButton(LocaleController.getString("OK", R.string.OK), null);
+                    showDialog(builder.create());
+                    exc.printStackTrace();
+                }
+                break;
+            }
+            case 994: {
+                if (Build.VERSION.SDK_INT >= 23 && getParentActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    getParentActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 4);
+                    selectedObject = null;
+                    selectedObjectGroup = null;
+                    selectedObjectToEditCaption = null;
+                    return;
+                }
+                ChatMessageCell messageCell = null;
+                int count = chatListView.getChildCount();
+                for (int a = 0; a < count; a++) {
+                    View child = chatListView.getChildAt(a);
+                    if (child instanceof ChatMessageCell) {
+                        ChatMessageCell cell = (ChatMessageCell) child;
+                        if (cell.getMessageObject() == selectedObject) {
+                            messageCell = cell;
+                            break;
+                        }
+                    }
+                }
+                String fileName = FileLoader.getDocumentFileName(selectedObject.getDocument());
+                if (TextUtils.isEmpty(fileName)) {
+                    fileName = selectedObject.getFileName();
+                }
+                String path = selectedObject.messageOwner.attachPath;
+                if (path != null && path.length() > 0) {
+                    File temp = new File(path);
+                    if (!temp.exists()) {
+                        path = null;
+                    }
+                }
+                if (path == null || path.length() == 0) {
+                    path = FileLoader.getPathToMessage(selectedObject.messageOwner).toString();
+                }
+                File file = new File(path);
+                boolean isDeleted = file.delete();
+                if (isDeleted) {
+                    selectedObject.mediaExists = false;
+                    if (messageCell != null) {
+                        messageCell.updateButtonState(false, true, false);
+                    }
+                    undoView.setInfoText(LocaleController.formatString("CG_ClearedFromCache", R.string.CG_ClearedFromCache));
+                    undoView.showWithAction(0, UndoView.ACTION_CACHE_WAS_CLEARED, null, null);
+                }
+                else {
+                    Toast.makeText(getParentActivity(), "Looks like something went wrong.", Toast.LENGTH_SHORT).show();
+                }
                 break;
             }
             case 3: {
