@@ -148,8 +148,10 @@ import java.util.regex.Pattern;
 
 import ua.itaysonlab.catogram.vkui.CGUIResources;
 import android.content.res.Resources;
+import ua.itaysonlab.redesign.BottomSlideFragment;
 
 public class LaunchActivity extends Activity implements ActionBarLayout.ActionBarLayoutDelegate, NotificationCenter.NotificationCenterDelegate, DialogsActivity.DialogsActivityDelegate {
+    private List<BottomSlideFragment> slideFragments = new ArrayList<>();
 
     private CGUIResources res = null;
     @Override
@@ -160,7 +162,17 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
     public void reloadResources() {
         res.reloadReplacements();
     }
-    
+
+    @Override
+    public void addBackPressedListener(BottomSlideFragment fragment) {
+        slideFragments.add(fragment);
+    }
+
+    @Override
+    public void removeBackPressedListener(BottomSlideFragment fragment) {
+        slideFragments.remove(fragment);
+    }
+
     private static final String EXTRA_ACTION_TOKEN = "actions.fulfillment.extra.ACTION_TOKEN";
 
     private boolean finished;
