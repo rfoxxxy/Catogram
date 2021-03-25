@@ -6666,7 +6666,11 @@ public class ProfileActivity extends BaseFragment implements NotificationCenter.
                         TLRPC.User user = UserConfig.getInstance(currentAccount).getCurrentUser();
                         String value;
                         if (user != null && user.phone != null && user.phone.length() != 0) {
-                            value = PhoneFormat.getInstance().format("+" + user.phone);
+                            if  (ua.itaysonlab.catogram.CatogramConfig.INSTANCE.getHidePhoneNumber()) {
+                                value = LocaleController.getString("AS_Hidden", R.string.AS_Hidden);
+                        } else {
+                                value = PhoneFormat.getInstance().format("+" + user.phone);
+                            }
                         } else {
                             value = LocaleController.getString("NumberUnknown", R.string.NumberUnknown);
                         }

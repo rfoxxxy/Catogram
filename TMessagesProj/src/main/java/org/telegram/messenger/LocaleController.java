@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import ua.itaysonlab.catogram.CatogramConfig;
+
 public class LocaleController {
 
     static final int QUANTITY_OTHER = 0x0000;
@@ -1645,6 +1647,7 @@ public class LocaleController {
     }
 
     public static String formatShortNumber(int number, int[] rounded) {
+        if (CatogramConfig.INSTANCE.getNoRounding()) return String.valueOf(number);
         StringBuilder K = new StringBuilder();
         int lastDec = 0;
         int KCount = 0;

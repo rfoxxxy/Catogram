@@ -127,17 +127,6 @@ class AppearancePreferencesEntry : BasePreferencesEntry {
             }
 
             switch {
-                title = LocaleController.getString("CG_FakeUserPhone", R.string.CG_FakeUserPhone)
-                summary = LocaleController.getString("CG_FakeUserPhoneSummary", R.string.CG_FakeUserPhoneSummary)
-
-                contract({
-                    return@contract CatogramConfig.fakePhoneNumber
-                }) {
-                    CatogramConfig.fakePhoneNumber = it
-                }
-            }
-
-            switch {
                 title = LocaleController.getString("AS_NoRounding", R.string.AS_NoRounding)
                 summary = LocaleController.getString("AS_NoRoundingSummary", R.string.AS_NoRoundingSummary)
 
@@ -158,16 +147,6 @@ class AppearancePreferencesEntry : BasePreferencesEntry {
                     }) {
                         CatogramConfig.systemFontsTT = it
                     }
-                }
-            }
-
-            switch {
-                title = LocaleController.getString("AS_Vibration", R.string.AS_Vibration)
-
-                contract({
-                    return@contract CatogramConfig.noVibration
-                }) {
-                    CatogramConfig.noVibration = it
                 }
             }
 
@@ -216,15 +195,6 @@ class AppearancePreferencesEntry : BasePreferencesEntry {
         }
 
         category(LocaleController.getString("AS_Header_Notification", R.string.AS_Header_Notification)) {
-            switch {
-                title = LocaleController.getString("AS_AccentNotify", R.string.AS_AccentNotify)
-
-                contract({
-                    return@contract CatogramConfig.accentNotification
-                }) {
-                    CatogramConfig.accentNotification = it
-                }
-            }
 
             switch {
                 title = LocaleController.getString("CG_OldNotification", R.string.CG_OldNotification)

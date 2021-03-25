@@ -4469,6 +4469,10 @@ public class ChatActivity extends BaseFragment implements NotificationCenter.Not
                         scrollingFloatingDate = true;
                         checkTextureViewPosition = true;
                         scrollingChatListView = true;
+                        if (CatogramConfig.INSTANCE.getHideKeyboardOnScroll()) {
+                            InputMethodManager imm = (InputMethodManager) getParentActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(recyclerView.getWindowToken(), 0);
+                        }
                     }
                     if (SharedConfig.getDevicePerformanceClass() == SharedConfig.PERFORMANCE_CLASS_LOW) {
                         NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.stopAllHeavyOperations, 512);
