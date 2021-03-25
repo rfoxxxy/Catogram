@@ -163,12 +163,10 @@ public class LaunchActivity extends Activity implements ActionBarLayout.ActionBa
         res.reloadReplacements();
     }
 
-    @Override
     public void addBackPressedListener(BottomSlideFragment fragment) {
         slideFragments.add(fragment);
     }
 
-    @Override
     public void removeBackPressedListener(BottomSlideFragment fragment) {
         slideFragments.remove(fragment);
     }
